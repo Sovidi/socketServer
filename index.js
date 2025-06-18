@@ -1,11 +1,11 @@
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const mysql = require('mysql');
-const WebSocket = require('ws');
-const http = require('http');
-const { Server } = require('socket.io');
-const fs = require('fs');
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const mysql = require("mysql");
+const WebSocket = require("ws");
+const http = require("http");
+const { Server } = require("socket.io");
+const fs = require("fs");
 const app = express();
 
 app.use(cors());
@@ -17,29 +17,22 @@ app.use(bodyParser.json());
 //   await console.log("ws 서버 연결됨");
 // });
 
-const io = new Server(3090, {
-  cors: {
-    origin: "*", // CORS 설정
-    methods: ["GET", "POST", "PUT", "DELETE"]
-  }
+const connection = mysql.createConnection({
+  host: "svc.sel5.cloudtype.app",
+  user: "root",
+  password: "1324",
+  database: "test",
+  port: "30825",
 });
 
-const connection = mysql.createConnection({
-	host: 'svc.sel5.cloudtype.app',
-	user: 'root',
-	password: '1324',
-	database: 'test',
-	port: "30825"
-})
-
 async function queryExecute(str, value) {
-	let data = await new Promise((resolve, reject) => {
-		connection.query(str, value, function (error, results) {
-			resolve(results);
-		});
-	});
-	return data;
-};
+  let data = await new Promise((resolve, reject) => {
+    connection.query(str, value, function (error, results) {
+      resolve(results);
+    });
+  });
+  return data;
+}
 
 const data = {
   select: () => {
@@ -54,10 +47,10 @@ const data = {
   },
   update: (bodyData) => {
     const select = data.select();
-    const newData = select.map(item => {
-      if(item.key == bodyData.key) {
+    const newData = select.map((item) => {
+      if (item.key == bodyData.key) {
         item.txt = bodyData.txt;
-      };
+      }
       return item;
     });
     fs.writeFileSync(`./data.json`, newData);
@@ -65,7 +58,7 @@ const data = {
   },
   delete: (key) => {
     const select = data.select();
-    const newData = select.filter(item => {
+    const newData = select.filter((item) => {
       return item.key != key;
     });
     fs.writeFileSync(`./data.json`, newData);
@@ -92,13 +85,13 @@ const data = {
 //   }
 // }
 
-app.get('/select', async function (req, res) {
+app.get("/select", async function (req, res) {
+  console.log("select 요청");
   let getData = await queryExecute("select * from todotxt");
   res.send(getData);
 });
 
-
-app.post('/insert', async function (req, res) {
+app.post("/insert", async function (req, res) {
   const bodyData = req.body;
   await queryExecute("insert into todotxt (sKey, txt) values (?, ?)", [bodyData.key, bodyData.txt]);
   let getData = await queryExecute("select * from todotxt");
@@ -107,7 +100,7 @@ app.post('/insert', async function (req, res) {
 });
 
 app.delete(`/delete`, async function (req, res) {
-  const {key} = req.query;
+  const { key } = req.query;
   await queryExecute("delete from todotxt where sKey=?", [key]);
 
   let getData = await queryExecute("select * from todotxt");
@@ -124,48 +117,14 @@ app.put(`/update`, async function (req, res) {
 
 // 댓글삭제 http 연결 형식
 app.delete(`/chatDelete`, async function (req, res) {
-  const {sKey} = req.query;
+  const { sKey } = req.query;
   await queryExecute("delete from chats where sKey=?", [sKey]);
   let getData = await queryExecute("select * from chats");
 
   res.send(getData);
 });
 
-
-
-let chat = [];
-
-io.on("connection", async (socket) => {
-	console.log("socket.io connected");
-  let getData = await queryExecute("select * from chats");
-  chat = getData;
-  socket.emit("chatData", JSON.stringify(getData));
-  
-  socket.on("submitMessage", async (message) => {
-    console.log("message received");
-    let chatData = await JSON.parse(message);
-    chat = [...chat, chatData];
-
-    await queryExecute("insert into chats (sKey, txt) values (?, ?)", [chatData.sKey, chatData.txt]);
-    io.emit("submitMessage", JSON.stringify(chat));
-  });
-
-  // 댓글삭제 socket.io 형식
-  socket.on("deleteChatKey", async (message) => {
-    console.log("deleteChatKey received");
-    const {sKey} = await JSON.parse(message);
-    console.log(sKey);
-    await queryExecute("delete from chats where sKey=?", [sKey]);
-    let getData = await queryExecute("select * from chats");
-    io.emit("chatData", JSON.stringify(getData));
-  });
-  
-  socket.on("disconnect", async () => {
-    console.log("socket.io disconnected");
-    chat = [];
-  });
-});
-
+// 바닐라 WS 코드작성 부분
 // const WebSocket = require("ws");
 // const wss = new WebSocket.Server({ port: 3090 }, async () => {
 //   await console.log("ws 서버 연결됨");
@@ -184,10 +143,49 @@ io.on("connection", async (socket) => {
 //   });
 // });
 
+// server.listen(3090, async () => {
+//   console.log("ws 서버 연결됨")
+// })
+
 app.listen(3080, async () => {
   await console.log("서버 연결됨");
 });
 
-// server.listen(3090, async () => {
-//   console.log("ws 서버 연결됨")
-// })
+const io = new Server(3090, {
+  cors: {
+    origin: "*", // CORS 설정
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  },
+});
+
+let chat = [];
+io.on("connection", async (socket) => {
+  console.log("socket.io connected");
+  let getData = await queryExecute("select * from chats");
+  chat = [...getData];
+  socket.emit("chatData", JSON.stringify(chat));
+
+  socket.on("submitMessage", async (message) => {
+    console.log("message received");
+    let chatData = await JSON.parse(message);
+    chat = [...chat, chatData];
+
+    await queryExecute("insert into chats (sKey, txt) values (?, ?)", [chatData.sKey, chatData.txt]);
+    io.emit("submitMessage", JSON.stringify(chat));
+  });
+
+  // 댓글삭제 socket.io 형식
+  socket.on("deleteChatKey", async (message) => {
+    console.log("deleteChatKey received");
+    const { sKey } = await JSON.parse(message);
+    await queryExecute("delete from chats where sKey=?", [sKey]);
+    let getData = await queryExecute("select * from chats");
+
+    io.emit("chatData", JSON.stringify(getData));
+  });
+
+  socket.on("disconnect", async () => {
+    console.log("socket.io disconnected");
+    chat = [];
+  });
+});
