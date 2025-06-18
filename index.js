@@ -1,8 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const WebSocket = require("ws");
-const http = require("http");
 const app = express();
 
 const webSocketStart = require("./src/webSocket.js");
@@ -13,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const queryExecute = require("./src/connection.js");
-const data = require("./src/dataModule.js");
+// const data = require("./src/dataModule.js");
 
 app.get("/select", async function (req, res) {
   console.log("select 요청");
