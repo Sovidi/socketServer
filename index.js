@@ -7,6 +7,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const fs = require("fs");
 const app = express();
+require("dotenv").config();
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -18,11 +19,11 @@ app.use(bodyParser.json());
 // });
 
 const connection = mysql.createConnection({
-  host: "svc.sel5.cloudtype.app",
-  user: "root",
-  password: "1324",
-  database: "test",
-  port: "30825",
+  host: process.env.HOST,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE,
+  port: process.env.PORT,
 });
 
 async function queryExecute(str, value) {

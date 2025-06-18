@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 
 stg.env
+.env
