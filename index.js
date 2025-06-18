@@ -3,7 +3,6 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const WebSocket = require("ws");
 const http = require("http");
-const fs = require("fs");
 const app = express();
 
 const webSocketStart = require("./src/webSocket.js");
@@ -14,57 +13,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const queryExecute = require("./src/connection.js");
-
-const data = {
-  select: () => {
-    const getData = JSON.parse(fs.readFileSync(`./data.json`));
-    return getData;
-  },
-  insert: (bodyData) => {
-    const select = data.select();
-    const newData = [...select, bodyData];
-    fs.writeFileSync(`./data.json`, newData);
-    return newData;
-  },
-  update: (bodyData) => {
-    const select = data.select();
-    const newData = select.map((item) => {
-      if (item.key == bodyData.key) {
-        item.txt = bodyData.txt;
-      }
-      return item;
-    });
-    fs.writeFileSync(`./data.json`, newData);
-    return newData;
-  },
-  delete: (key) => {
-    const select = data.select();
-    const newData = select.filter((item) => {
-      return item.key != key;
-    });
-    fs.writeFileSync(`./data.json`, newData);
-    return newData;
-  },
-};
-
-// const data = {
-//   select: () => {
-//     return JSON.parse(fs.readFileSync(`./data.json`))
-//   },
-//   insert: (bodyData) => {
-//     const sData = data.select()
-//     const newData = [...sData, bodyData]
-//     fs.writeFileSync(`./data.json`, JSON.stringify(newData))
-//     return newData
-//   },
-//   update: (bodyData) => {
-
-//     return []
-//   },
-//   delete: () => {
-//     return []
-//   }
-// }
+const data = require("./src/dataModule.js");
 
 app.get("/select", async function (req, res) {
   console.log("select 요청");
