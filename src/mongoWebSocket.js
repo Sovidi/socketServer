@@ -1,7 +1,7 @@
 const { Server } = require("socket.io");
-const queryExecute = require("./sqlConnection.js");
+const dbConnect = require("./mongoConnection.js");
 
-function webSocketStart() {
+async function mongoWebSocket() {
   const io = new Server(3090, {
     cors: {
       origin: "*", // CORS 설정
@@ -9,28 +9,32 @@ function webSocketStart() {
     },
   });
 
+  const { client, collection } = await dbConnect("chats");
+
   let chat = [];
   io.on("connection", async (socket) => {
     console.log("socket.io connected");
-    let getData = await queryExecute("select * from chats");
+
+    let getData = await collection.find().toArray();
     chat = [...getData];
+
     socket.emit("chatData", JSON.stringify(chat));
 
     socket.on("submitMessage", async (message) => {
       console.log("message received");
       let chatData = await JSON.parse(message);
       chat = [...chat, chatData];
+      await collection.insertOne(chatData);
 
-      await queryExecute("insert into chats (sKey, txt) values (?, ?)", [chatData.sKey, chatData.txt]);
       io.emit("submitMessage", JSON.stringify(chat));
     });
 
     // 댓글삭제 socket.io 형식
     socket.on("deleteChatKey", async (message) => {
       console.log("deleteChatKey received");
-      const { sKey } = await JSON.parse(message);
-      await queryExecute("delete from chats where sKey=?", [sKey]);
-      let getData = await queryExecute("select * from chats");
+      const { key } = await JSON.parse(message);
+      await collection.deleteOne({ key: key });
+      let getData = await collection.find().toArray();
 
       io.emit("chatData", JSON.stringify(getData));
     });
@@ -42,4 +46,4 @@ function webSocketStart() {
   });
 }
 
-module.exports = webSocketStart;
+module.exports = mongoWebSocket;

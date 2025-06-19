@@ -9,6 +9,14 @@ const connection = mysql.createConnection({
   port: process.env.PORT,
 });
 
+connection.connect((err) => {
+  if (err) {
+    console.error("❎ MySQL 연결 실패:", err);
+  } else {
+    console.log("✅ MySQL 연결 성공");
+  }
+});
+
 async function queryExecute(str, value) {
   let data = await new Promise((resolve, reject) => {
     connection.query(str, value, function (error, results) {

@@ -8,7 +8,7 @@ const data = {
   insert: (bodyData) => {
     const select = data.select();
     const newData = [...select, bodyData];
-    fs.writeFileSync(`./data.json`, newData);
+    fs.writeFileSync(`./data.json`, JSON.stringify(newData));
     return newData;
   },
   update: (bodyData) => {
@@ -19,7 +19,7 @@ const data = {
       }
       return item;
     });
-    fs.writeFileSync(`./data.json`, newData);
+    fs.writeFileSync(`./data.json`, JSON.stringify(newData));
     return newData;
   },
   delete: (key) => {
@@ -27,7 +27,7 @@ const data = {
     const newData = select.filter((item) => {
       return item.key != key;
     });
-    fs.writeFileSync(`./data.json`, newData);
+    fs.writeFileSync(`./data.json`, JSON.stringify(newData));
     return newData;
   },
 };
