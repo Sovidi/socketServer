@@ -1,7 +1,7 @@
 const { Server } = require("socket.io");
 const queryExecute = require("./sqlConnection.js");
 
-function webSocketStart() {
+function sqlWebSocketInit() {
   const io = new Server(3090, {
     cors: {
       origin: "*", // CORS 설정
@@ -42,4 +42,4 @@ function webSocketStart() {
   });
 }
 
-module.exports = webSocketStart;
+module.exports = sqlWebSocketInit;
