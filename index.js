@@ -6,10 +6,15 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Socket.io mongoDB 연결부
-const mongoWebSocketInit = require("./src/mongoWebSocketInit.js");
-mongoWebSocketInit();
+const httpPort = 3080;
+const wsPort = 3090;
 
+// websocket 연결부
+// MongoDB 형식
+const mongoWebSocketInit = require("./src/mongoWebSocketInit.js");
+mongoWebSocketInit(wsPort);
+
+// HTTP 연결부
 // MongoDB 형식
 const mongoDbInit = require("./src/mongoDbInit.js");
 mongoDbInit(app);
@@ -22,6 +27,6 @@ mongoDbInit(app);
 // const sqlServerInit = require("./src/sqlServerInit.js");
 // sqlServerInit(app);
 
-app.listen(3080, async () => {
-  await console.log("node 서버 연결됨");
+app.listen(httpPort, async () => {
+  await console.log(httpPort, "node 서버 연결됨");
 });

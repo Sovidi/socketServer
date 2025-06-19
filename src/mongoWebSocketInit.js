@@ -1,8 +1,8 @@
 const { Server } = require("socket.io");
 const dbConnect = require("./mongoConnection.js");
 
-async function mongoWebSocketInit() {
-  const io = new Server(3090, {
+async function mongoWebSocketInit(wsPort) {
+  const io = new Server(wsPort, {
     cors: {
       origin: "*", // CORS 설정
       methods: ["GET", "POST", "PUT", "DELETE"],

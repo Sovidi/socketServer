@@ -9,9 +9,9 @@ async function dbConnect(collectionName) {
   if (connectSafer) {
     await client.connect();
     connectSafer = false;
-    console.log("✅ MongoDB connect 신규 연결함");
+    console.log("MongoDB connect 신규 연결함");
   } else {
-    console.log("🔄 MongoDB connect 이미 연결됨");
+    console.log("MongoDB connect 이미 연결됨(연결회피)");
   }
 
   const db = client.db("test");
