@@ -6,8 +6,9 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const httpPort = 3080;
-const wsPort = 3090;
+require("dotenv").config();
+const httpPort = process.env.HTTP_PORT;
+const wsPort = process.env.WEBSOCKET_PORT;
 
 // websocket 연결부
 // MongoDB 형식
@@ -26,6 +27,14 @@ mongoDbInit(app);
 // SQL MariaDB 형식
 // const sqlServerInit = require("./src/sqlServerInit.js");
 // sqlServerInit(app);
+
+process.on("uncaughtException", (err) => {
+  console.error("예외처리:", err);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("거부됨:", reason);
+});
 
 app.listen(httpPort, async () => {
   await console.log(httpPort, "node 서버 연결됨");

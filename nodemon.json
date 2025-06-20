@@ -2,5 +2,8 @@
   "watch": ["index.js", "routes/", "src"],
   "ext": "js,json",
   "ignore": ["node_modules/"],
-  "exec": "node index.js"
+  "exec": "node index.js",
+  "restartable": "rs",
+  "legacyWatch": true,
+  "exitcrash": true
 }

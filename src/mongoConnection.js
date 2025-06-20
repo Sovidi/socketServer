@@ -1,11 +1,9 @@
 // mongoConnection.js
-require("dotenv").config();
-const { MongoClient } = require("mongodb");
+let { client } = require("./mongoClient.js");
 
-const client = new MongoClient(process.env.MONGOKEY);
 let connectSafer = true;
 
-async function dbConnect(collectionName) {
+async function mongoDbConnect(collectionName) {
   if (connectSafer) {
     await client.connect();
     connectSafer = false;
@@ -18,11 +16,4 @@ async function dbConnect(collectionName) {
   return { client, collection: db.collection(collectionName) };
 }
 
-// 서버 종료 시 연결 닫기
-process.on("SIGINT", async () => {
-  await client.close();
-  console.log("❎ MongoDB connect 닫기 완료");
-  process.exit(0);
-});
-
-module.exports = dbConnect;
+module.exports = mongoDbConnect;

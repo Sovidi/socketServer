@@ -1,5 +1,5 @@
 const { Server } = require("socket.io");
-const dbConnect = require("./mongoConnection.js");
+const mongoDbConnect = require("./mongoConnection.js");
 
 async function mongoWebSocketInit(wsPort) {
   const io = new Server(wsPort, {
@@ -9,7 +9,7 @@ async function mongoWebSocketInit(wsPort) {
     },
   });
 
-  const { client, collection } = await dbConnect("chats");
+  const { client, collection } = await mongoDbConnect("chats");
 
   let chat = [];
   io.on("connection", async (socket) => {
