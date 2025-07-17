@@ -5,9 +5,14 @@ let connectSafer = true;
 
 async function mongoDbConnect(collectionName) {
   if (connectSafer) {
-    await client.connect();
-    connectSafer = false;
-    console.log("MongoDB connect 신규 연결함");
+    try {
+      await client.connect();
+      connectSafer = false;
+      console.log("MongoDB connect 신규 연결함");
+    } catch (err) {
+      console.error("MongoDB connect 실패:", err.message);
+      throw err;
+    }
   } else {
     console.log("MongoDB connect 이미 연결됨(연결회피)");
   }
